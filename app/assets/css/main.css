@@ -1,0 +1,98 @@
+/* app/assets/css/main.css
+ * Global stylesheet for AskSphere.
+ * Tailwind processes this file and injects its generated utilities
+ * where the @tailwind directives appear below.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ----------------------------------------------------------------
+ * Base layer: sensible defaults for every page.
+ * ---------------------------------------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface text-ink font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-ink;
+  }
+
+  a {
+    @apply text-primary hover:text-primary-hover;
+  }
+
+  /* Make sure focused elements are visible for keyboard users. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-surface;
+  }
+}
+
+/* ----------------------------------------------------------------
+ * Component layer: reusable class combinations.
+ * ---------------------------------------------------------------- */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+           text-sm font-medium transition-colors
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-hover
+           focus-visible:ring-2 focus-visible:ring-primary;
+  }
+
+  .btn-secondary {
+    @apply btn bg-white text-ink border border-surface-border
+           hover:bg-surface;
+  }
+
+  .btn-danger {
+    @apply btn bg-danger text-white hover:opacity-90;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-surface-border bg-white
+           px-3 py-2 text-sm text-ink
+           placeholder:text-ink-muted
+           focus:border-primary focus:ring-2 focus:ring-primary/30
+           disabled:opacity-60;
+  }
+
+  .card {
+    @apply bg-surface-card border border-surface-border rounded-xl
+           shadow-card;
+  }
+
+  .tag {
+    @apply inline-flex items-center rounded-full bg-surface
+           px-2.5 py-0.5 text-xs font-medium text-ink-muted
+           border border-surface-border;
+  }
+
+  .link {
+    @apply text-primary hover:text-primary-hover underline-offset-2
+           hover:underline;
+  }
+}
+
+/* ----------------------------------------------------------------
+ * Utility layer: helpers we reuse often.
+ * ---------------------------------------------------------------- */
+@layer utilities {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .sr-only-focusable:focus {
+    @apply not-sr-only;
+  }
+}
