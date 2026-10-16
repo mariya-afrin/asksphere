@@ -77,19 +77,21 @@
         </template>
 
         <template v-else>
-          <NuxtLink
-            to="/notifications"
-            class="relative rounded-lg p-2 text-ink-muted hover:bg-surface hover:text-ink"
-            aria-label="Notifications"
-          >
-            <Bell class="h-5 w-5" />
+          <div class="relative inline-flex items-center justify-center shrink-0">
+            <NuxtLink
+              to="/notifications"
+              class="inline-flex items-center justify-center rounded-lg p-2 text-ink-muted hover:bg-surface hover:text-ink transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell class="h-5 w-5" />
+            </NuxtLink>
             <span
               v-if="unreadCount > 0"
-              class="absolute top-1 right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white leading-none"
+              class="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white leading-none pointer-events-none z-10 shadow-sm"
             >
               {{ unreadCount > 9 ? '9+' : unreadCount }}
             </span>
-          </NuxtLink>
+          </div>
           <div class="relative">
             <button
               type="button"
