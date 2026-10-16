@@ -56,17 +56,19 @@ export default defineEventHandler(async (event) => {
       { _id: questionId },
       { $set: { acceptedAnswerId: answerId } }
     )
-// Notify the new accepted answer's author.
-await createNotification({
-  recipientId: newAuthorId,
-  actorId: String(user._id),
-  type: 'accept',
-  questionId,
-  answerId,
-  message: `${user.username} accepted your answer to "${question.title}"`
-})
-    // Reputation: +15 to new accepted author, -15 to previous accepted author.
     const newAuthorId = String(answer.authorId)
+
+    // Notify the new accepted answer's author.
+    await createNotification({
+      recipientId: newAuthorId,
+      actorId: String(user._id),
+      type: 'accept',
+      questionId,
+      answerId,
+      message: `${user.username} accepted your answer to "${question.title}"`
+    })
+
+    // Reputation: +15 to new accepted author, -15 to previous accepted author.
     await User.updateOne({ _id: newAuthorId }, { $inc: { reputation: 15, acceptedAnswerCount: 1 } })
 
     if (previousId) {

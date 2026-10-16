@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full space-y-6">
+  <div class="dashboard-page question-liquid w-full space-y-6 rounded-[2rem] p-2 sm:p-3">
     <LoadingState v-if="pending" label="Loading question..." />
 
     <div v-else-if="error" class="card p-6 max-w-2xl mx-auto">
@@ -8,7 +8,7 @@
 
     <template v-else-if="question">
       <!-- Breadcrumb navigation -->
-      <div class="flex items-center justify-between text-xs text-ink-muted">
+      <div class="liquid-glass flex items-center justify-between rounded-2xl px-4 py-3 text-xs text-ink-muted">
         <NuxtLink to="/questions" class="inline-flex items-center gap-1 hover:text-ink font-medium transition-colors">
           ← Back to questions
         </NuxtLink>
@@ -20,7 +20,7 @@
         
         <!-- LEFT COLUMN: Question Details & Discussion (lg:col-span-6 xl:col-span-7) -->
         <div class="lg:col-span-6 xl:col-span-7 space-y-6">
-          <article class="card p-6 sm:p-7 space-y-5">
+          <article class="liquid-glass rounded-[1.7rem] p-6 sm:p-7 space-y-5">
             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <h1 class="text-xl sm:text-2xl font-bold text-ink leading-snug">
                 {{ question.title }}
@@ -135,7 +135,7 @@
             />
           </section>
 
-          <div v-else class="card p-5 text-sm text-ink-muted text-center space-y-2">
+          <div v-else class="liquid-glass rounded-3xl p-5 text-sm text-ink-muted text-center space-y-2">
             <p>Have an answer to this question?</p>
             <div class="flex justify-center gap-2">
               <NuxtLink to="/login" class="btn-primary text-xs">Log in to answer</NuxtLink>
@@ -145,7 +145,7 @@
 
           <!-- Answers Section Header & Feed -->
           <section class="space-y-4">
-            <div class="flex items-center justify-between pb-2 border-b border-surface-border">
+            <div class="liquid-glass rounded-2xl px-4 py-3 flex items-center justify-between border-b border-surface-border">
               <h2 class="text-base font-semibold text-ink flex items-center gap-2">
                 <span>{{ answers.length }} {{ answers.length === 1 ? 'Answer' : 'Answers' }}</span>
                 <span
@@ -220,6 +220,7 @@ interface QuestionDetail {
   viewCount: number
   voteScore: number
   status: string
+  acceptedAnswerId?: string | null
   createdAt: string
   author: {
     id: string | null
@@ -334,7 +335,7 @@ async function createQuestionComment(body: string) {
   }
 }
 
-async function updateQuestionComment({ id: cid, body }: { id: string; body: string }) {
+async function updateQuestionComment(cid: string, body: string) {
   try {
     await $fetch(`/api/comments/${cid}`, { method: 'PATCH', body: { body } })
     await refreshQuestionComments()

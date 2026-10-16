@@ -67,6 +67,9 @@ try {
   ])
 
   const [aya, tariq, noor, rana, leo] = users
+  if (!aya || !tariq || !noor || !rana || !leo) {
+    throw new Error('Seed users could not be created.')
+  }
 
   console.log('Creating sample questions...')
   await Question.create([

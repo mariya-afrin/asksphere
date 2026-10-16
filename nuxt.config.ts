@@ -21,7 +21,15 @@ export default defineNuxtConfig({
     cssPath: '~/assets/css/main.css',
     configPath: 'tailwind.config.ts',
     exposeConfig: false,
-    viewer: true
+    viewer: false
+  },
+
+  // PostCSS plugins
+  postcss: {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {}
+    }
   },
 
   // TypeScript strictness. Strict mode catches more mistakes at compile time.

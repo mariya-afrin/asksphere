@@ -70,6 +70,7 @@ export default defineEventHandler(async (event) => {
       answerCount: q.answerCount,
       viewCount: q.viewCount,
       voteScore: q.voteScore,
+      acceptedAnswerId: q.acceptedAnswerId ? String(q.acceptedAnswerId) : null,
       createdAt: (q as { createdAt: Date }).createdAt.toISOString(),
       author: {
         username: q.authorId?.username ?? 'deleted-user',

@@ -1,7 +1,7 @@
 <template>
   <article
-    class="card p-5 transition-colors"
-    :class="answer.isAccepted ? 'border-success/50 bg-success/5' : ''"
+    class="glass-card p-5 transition-colors"
+    :class="answer.isAccepted ? 'border-success/50 !bg-success/10' : ''"
   >
     <div class="flex items-start gap-4">
       <!-- Vote column -->
@@ -85,7 +85,7 @@
             :comments="answer.comments ?? []"
             :current-user-id="currentUserId"
             :is-admin="isAdmin"
-            @update="(payload) => $emit('comment-update', payload)"
+            @update="(id, body) => $emit('comment-update', { id, body })"
             @delete="(id) => $emit('comment-delete', id)"
           />
           <CommentForm

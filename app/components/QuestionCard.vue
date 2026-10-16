@@ -3,13 +3,13 @@
  * Props are a subset of the Question model.
  -->
 <template>
-  <article class="card p-4 sm:p-5 hover:border-primary/40 hover:shadow-sm transition-all duration-200 group bg-white">
-    <!-- Post Header: Author, relative time, Category pill -->
+  <article class="glass-card tint-mint p-4 sm:p-5.5 hover:shadow-md transition-all duration-200 group rounded-2xl">
+    <!-- Post Header: Author, relative time, Category pill, Solved badge -->
     <div class="flex items-center justify-between gap-3 mb-2.5">
       <div class="flex items-center gap-2.5 min-w-0">
         <!-- Author Avatar -->
         <NuxtLink :to="`/users/${question.author.username}`" class="shrink-0" :aria-label="question.author.username">
-          <div class="h-8 w-8 rounded-full bg-primary/10 text-primary font-bold text-xs grid place-items-center overflow-hidden border border-surface-border">
+          <div class="h-8 w-8 rounded-full bg-primary/10 text-primary font-bold text-xs grid place-items-center overflow-hidden border border-surface-border ring-1 ring-transparent group-hover:ring-primary/20 transition-all">
             <img
               v-if="question.author.avatarUrl"
               :src="question.author.avatarUrl"
@@ -30,25 +30,35 @@
           </NuxtLink>
           <span
             v-if="question.author.reputation !== undefined"
-            class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-surface text-ink-muted border border-surface-border shrink-0"
+            class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-white/60 text-ink-muted border border-white/80 shrink-0"
             title="Reputation"
           >
             {{ question.author.reputation }} rep
           </span>
-          <span class="text-ink-muted/60">·</span>
+          <span class="text-ink-muted/50">·</span>
           <time :datetime="question.createdAt" class="text-ink-muted shrink-0 text-xs">
             {{ relativeTime }}
           </time>
         </div>
       </div>
 
-      <!-- Category Pill -->
-      <NuxtLink
-        :to="`/categories/${question.category.toLowerCase()}`"
-        class="tag text-xs font-medium bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors shrink-0"
-      >
-        {{ question.category }}
-      </NuxtLink>
+      <!-- Badges: Solved & Category -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <span
+          v-if="question.acceptedAnswerId"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success/10 text-success border border-success/30"
+          title="This question has a verified accepted answer"
+        >
+          <CheckCircle2 class="h-3 w-3" />
+          <span>Solved</span>
+        </span>
+        <NuxtLink
+          :to="`/categories/${question.category.toLowerCase()}`"
+          class="tag text-xs font-medium bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors"
+        >
+          {{ question.category }}
+        </NuxtLink>
+      </div>
     </div>
 
     <!-- Question Title -->
@@ -71,7 +81,7 @@
       <NuxtLink
         v-for="tag in question.tags"
         :key="tag"
-        :to="`/tags/${tag}`"
+        :to="`/tags/${encodeURIComponent(tag)}`"
         class="tag text-xs py-0.5 px-2 hover:border-primary/40 hover:text-primary transition-colors"
       >
         #{{ tag }}
@@ -79,7 +89,7 @@
     </div>
 
     <!-- Bottom Engagement Bar: Votes, Answers, Views -->
-    <div class="mt-4 pt-3 border-t border-surface-border flex items-center justify-between text-xs text-ink-muted gap-3 flex-wrap">
+      <div class="mt-4 pt-3 border-t border-emerald-950/10 flex items-center justify-between text-xs text-ink-muted gap-3 flex-wrap">
       <div class="flex items-center gap-2">
         <!-- Votes Pill -->
         <div
@@ -121,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronUp, MessageSquare, Eye } from 'lucide-vue-next'
+import { ChevronUp, MessageSquare, Eye, CheckCircle2 } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 export interface QuestionCardData {
@@ -133,6 +143,7 @@ export interface QuestionCardData {
   answerCount: number
   viewCount: number
   voteScore?: number
+  acceptedAnswerId?: string | null
   createdAt: string
   author: {
     username: string

@@ -1,12 +1,16 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-surface-border">
+  <div class="dashboard-page space-y-6 rounded-[2rem] p-2 sm:p-3">
+    <section class="glass-card tint-sky flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[1.7rem] p-5 sm:p-7">
       <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-ink">All questions</h1>
-        <p class="text-xs sm:text-sm text-ink-muted mt-0.5">Explore community questions, discussions, and solutions</p>
+        <div class="pill-badge mb-1">
+          <BookOpen class="h-3.5 w-3.5 text-primary" />
+          <span>Public Knowledge Base</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-ink">Public Questions</h1>
+        <p class="text-xs sm:text-sm text-ink-muted mt-1">Explore all community questions, solutions, and technical discussions.</p>
       </div>
       <div class="flex items-center gap-2.5 flex-wrap">
-        <div class="flex items-center gap-1 p-1 bg-surface-card rounded-xl border border-surface-border shadow-xs">
+        <div class="flex items-center gap-1 p-1 bg-white rounded-xl border border-surface-border shadow-2xs">
           <button
             v-for="tab in tabs"
             :key="tab.value"
@@ -14,7 +18,7 @@
             class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium transition-all"
             :class="
               sort === tab.value
-                ? 'bg-primary text-white shadow-sm'
+                ? 'bg-primary text-white shadow-xs'
                 : 'text-ink-muted hover:text-ink hover:bg-surface'
             "
             @click="setSort(tab.value)"
@@ -27,7 +31,7 @@
           Ask question
         </NuxtLink>
       </div>
-    </div>
+    </section>
 
     <LoadingState v-if="pending" label="Loading questions..." />
 
@@ -53,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { Clock, Flame, HelpCircle } from 'lucide-vue-next'
+import { BookOpen, Clock, Flame, HelpCircle } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { QuestionCardData } from '~/components/QuestionCard.vue'

@@ -1,5 +1,5 @@
 <template>
-  <form class="card p-5 space-y-4" @submit.prevent="onSubmit">
+  <form class="liquid-glass p-5 space-y-4" @submit.prevent="onSubmit">
     <h3 class="text-sm font-semibold text-ink">
       {{ editing ? 'Edit your answer' : 'Your answer' }}
     </h3>

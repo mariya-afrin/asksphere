@@ -3,19 +3,24 @@
  * Provides the header, main content slot, and footer.
  -->
 <template>
-  <div class="min-h-screen flex flex-col bg-surface">
+  <!-- The entry page is deliberately a self-contained experience. The product
+       shell starts once a visitor enters the community or signs in. -->
+  <div v-if="isLanding" class="min-h-screen">
+    <slot />
+  </div>
+
+  <div v-else class="min-h-screen flex flex-col bg-surface">
     <AppHeader />
-
-    <main class="flex-1">
-      <div class="container-page py-6">
-        <slot />
-      </div>
-    </main>
-
+    <main class="flex-1"><div class="container-page py-6"><slot /></div></main>
     <AppFooter />
   </div>
 </template>
 
 <script setup lang="ts">
-// No logic — just composition.
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const { isAuthenticated } = useAuth()
+const isLanding = computed(() => route.path === '/' && !isAuthenticated.value)
 </script>
