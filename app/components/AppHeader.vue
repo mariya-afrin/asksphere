@@ -16,15 +16,27 @@
       <div class="relative hidden lg:flex flex-1 max-w-md ml-auto">
         <form class="w-full" @submit.prevent="onSearch">
           <label class="sr-only" for="header-search">Search questions</label>
-          <input
-            id="header-search"
-            v-model="searchTerm"
-            type="search"
-            placeholder="Search questions..."
-            class="input w-full"
-            autocomplete="off"
-            @focus="onSearchFocus"
-          />
+          <div class="relative w-full">
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted pointer-events-none" />
+            <input
+              id="header-search"
+              v-model="searchTerm"
+              type="search"
+              placeholder="Search questions..."
+              class="input w-full pl-9 pr-8"
+              autocomplete="off"
+              @focus="onSearchFocus"
+            />
+            <button
+              v-if="searchTerm"
+              type="button"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink p-0.5"
+              aria-label="Clear search"
+              @click="searchTerm = ''; searchDropdownOpen = false"
+            >
+              <X class="h-4 w-4" />
+            </button>
+          </div>
         </form>
 
         <!-- Live search dropdown -->
@@ -69,6 +81,18 @@
       </div>
 
       <div class="ml-auto flex items-center gap-2 lg:ml-0">
+        <!-- Mobile Search Toggle Button -->
+        <button
+          type="button"
+          class="lg:hidden inline-flex items-center justify-center rounded-lg p-2 text-ink-muted hover:bg-surface hover:text-ink transition-colors"
+          :aria-expanded="mobileSearchOpen"
+          aria-label="Search"
+          @click="toggleMobileSearch"
+        >
+          <X v-if="mobileSearchOpen" class="h-5 w-5" />
+          <Search v-else class="h-5 w-5" />
+        </button>
+
         <NuxtLink to="/ask" class="btn-primary hidden sm:inline-flex">Ask Question</NuxtLink>
 
         <template v-if="!isAuthenticated">
@@ -120,17 +144,92 @@
         </template>
       </div>
     </div>
+
+    <!-- Mobile Search Drawer -->
+    <div
+      v-if="mobileSearchOpen"
+      class="lg:hidden border-t border-surface-border bg-white px-4 py-2.5 shadow-sm"
+    >
+      <div class="relative w-full">
+        <form @submit.prevent="onSearch">
+          <label class="sr-only" for="mobile-header-search">Search questions</label>
+          <div class="relative flex items-center">
+            <Search class="absolute left-3 h-4 w-4 text-ink-muted pointer-events-none" />
+            <input
+              id="mobile-header-search"
+              ref="mobileSearchInput"
+              v-model="searchTerm"
+              type="search"
+              placeholder="Search questions..."
+              class="input w-full pl-9 pr-8 text-sm"
+              autocomplete="off"
+              @focus="onSearchFocus"
+            />
+            <button
+              v-if="searchTerm"
+              type="button"
+              class="absolute right-2.5 p-1 text-ink-muted hover:text-ink"
+              aria-label="Clear search"
+              @click="searchTerm = ''; searchDropdownOpen = false"
+            >
+              <X class="h-4 w-4" />
+            </button>
+          </div>
+        </form>
+
+        <!-- Live search dropdown for mobile -->
+        <div
+          v-if="searchDropdownOpen && searchTerm.trim()"
+          class="mt-1.5 card p-2 z-50 shadow-lg text-sm divide-y divide-surface-border bg-white max-h-72 overflow-y-auto"
+        >
+          <div v-if="liveSearchLoading" class="p-3 text-xs text-ink-muted flex items-center justify-center gap-2">
+            <span>Searching...</span>
+          </div>
+
+          <template v-else-if="liveSearchResults.length">
+            <NuxtLink
+              v-for="q in liveSearchResults"
+              :key="q.id"
+              :to="`/questions/${q.id}`"
+              class="block p-2 rounded hover:bg-surface transition-colors"
+              @click="closeSearchDropdown(); mobileSearchOpen = false"
+            >
+              <div class="font-medium text-ink truncate">{{ q.title }}</div>
+              <div class="mt-1 flex items-center gap-2 text-xs text-ink-muted">
+                <span class="tag text-[10px] py-0.5 px-1.5">{{ q.category }}</span>
+                <span>{{ q.answerCount }} answers</span>
+                <span>score {{ q.voteScore }}</span>
+              </div>
+            </NuxtLink>
+
+            <button
+              type="button"
+              class="w-full text-left p-2 text-xs font-medium text-primary hover:bg-surface rounded pt-2 mt-1"
+              @click="onSearch"
+            >
+              See all results for "{{ searchTerm.trim() }}" →
+            </button>
+          </template>
+
+          <div v-else class="p-3 text-xs text-ink-muted text-center">
+            No matching questions found.
+          </div>
+        </div>
+      </div>
+    </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { Bell } from 'lucide-vue-next'
-import { ref, computed, watch } from 'vue'
+import { Bell, Search, X } from 'lucide-vue-next'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const searchTerm = ref('')
 const menuOpen = ref(false)
+const mobileSearchOpen = ref(false)
+const mobileSearchInput = ref<HTMLInputElement | null>(null)
 const searchDropdownOpen = ref(false)
 const liveSearchLoading = ref(false)
 const liveSearchResults = ref<any[]>([])
@@ -151,6 +250,27 @@ const { data: notifData } = await useFetch<{
 })
 
 const unreadCount = computed(() => notifData.value?.data?.unreadCount ?? 0)
+
+function toggleMobileSearch() {
+  mobileSearchOpen.value = !mobileSearchOpen.value
+  if (mobileSearchOpen.value) {
+    if (searchTerm.value.trim() && liveSearchResults.value.length > 0) {
+      searchDropdownOpen.value = true
+    }
+    nextTick(() => {
+      mobileSearchInput.value?.focus()
+    })
+  } else {
+    searchDropdownOpen.value = false
+  }
+}
+
+// Close overlays on route change
+router.afterEach(() => {
+  mobileSearchOpen.value = false
+  searchDropdownOpen.value = false
+  menuOpen.value = false
+})
 
 // Debounced live search
 let searchTimer: ReturnType<typeof setTimeout> | null = null
@@ -195,6 +315,7 @@ function closeSearchDropdown() {
 function onSearch() {
   const q = searchTerm.value.trim()
   searchDropdownOpen.value = false
+  mobileSearchOpen.value = false
   if (!q) return
   router.push({ path: '/search', query: { q } })
 }
