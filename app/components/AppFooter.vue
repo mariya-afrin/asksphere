@@ -2,7 +2,7 @@
  * Simple footer with links and copyright.
  -->
 <template>
-  <footer class="border-t border-surface-border bg-white mt-16">
+  <footer class="relative z-[1] mt-16 border-t border-surface-border bg-white">
     <div class="container-page py-10 grid gap-8 sm:grid-cols-2 md:grid-cols-4">
       <div class="space-y-3 sm:col-span-2">
         <NuxtLink to="/" class="flex items-center gap-2.5">

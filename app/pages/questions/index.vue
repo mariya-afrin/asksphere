@@ -10,7 +10,7 @@
         <p class="text-xs sm:text-sm text-ink-muted mt-1">Explore all community questions, solutions, and technical discussions.</p>
       </div>
       <div class="flex items-center gap-2.5 flex-wrap">
-        <div class="flex items-center gap-1 p-1 bg-white rounded-xl border border-surface-border shadow-2xs">
+        <div class="flex items-center gap-1 p-1 rounded-xl border border-white/70 bg-white/40 backdrop-blur-md">
           <button
             v-for="tab in tabs"
             :key="tab.value"

@@ -1,9 +1,9 @@
 <template>
   <!-- Visitors get a focused, standalone first impression: no application chrome. -->
-  <div v-if="!isAuthenticated" class="landing-page overflow-hidden bg-[#f8fbfa] text-slate-950">
+  <div v-if="!isAuthenticated" class="landing-page overflow-hidden bg-transparent text-slate-950">
     <div class="landing-orb landing-orb-one"></div><div class="landing-orb landing-orb-two"></div><div class="landing-grid"></div>
     <main class="relative mx-auto flex min-h-screen max-w-[1360px] items-center px-5 py-7 sm:px-8 lg:px-12 xl:px-16">
-      <section class="w-full rounded-[2rem] border border-white/80 bg-white/48 px-6 py-8 shadow-[0_24px_70px_-42px_rgba(8,53,40,.46)] backdrop-blur-xl sm:rounded-[2.5rem] sm:px-10 sm:py-10 lg:px-12 lg:py-11">
+      <section class="w-full rounded-[2rem] border border-white/70 bg-white/40 px-6 py-8 shadow-[0_24px_70px_-48px_rgba(8,53,40,.28)] backdrop-blur-2xl sm:rounded-[2.5rem] sm:px-10 sm:py-10 lg:px-12 lg:py-11">
         <div class="grid items-center gap-10 lg:grid-cols-[1.02fr_.98fr] lg:gap-12">
           <div class="max-w-2xl">
             <NuxtLink to="/" class="inline-flex items-center gap-3" aria-label="AskSphere home"><span class="grid h-11 w-11 place-items-center rounded-2xl bg-[#0d513c] text-lg font-black text-white shadow-lg shadow-emerald-950/20">A</span><span class="text-lg font-bold tracking-[-0.04em] text-[#123c30]">AskSphere</span></NuxtLink>

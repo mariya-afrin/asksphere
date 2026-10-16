@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-md mx-auto py-6 sm:py-10">
-    <div class="card p-6 sm:p-8 bg-white border border-surface-border shadow-sm space-y-6">
+    <div class="card p-6 sm:p-8 space-y-6">
       <!-- Header -->
       <div class="text-center space-y-2">
         <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-700 text-white font-bold text-xl shadow-sm mb-1">

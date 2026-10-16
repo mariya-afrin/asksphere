@@ -3,7 +3,7 @@
  * Props are a subset of the Question model.
  -->
 <template>
-  <article class="glass-card tint-mint p-4 sm:p-5.5 hover:shadow-md transition-all duration-200 group rounded-2xl">
+  <article class="glass-card p-4 sm:p-5.5 hover:shadow-md transition-all duration-200 group rounded-2xl">
     <!-- Post Header: Author, relative time, Category pill, Solved badge -->
     <div class="flex items-center justify-between gap-3 mb-2.5">
       <div class="flex items-center gap-2.5 min-w-0">
@@ -89,7 +89,7 @@
     </div>
 
     <!-- Bottom Engagement Bar: Votes, Answers, Views -->
-      <div class="mt-4 pt-3 border-t border-emerald-950/10 flex items-center justify-between text-xs text-ink-muted gap-3 flex-wrap">
+      <div class="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-xs text-ink-muted gap-3 flex-wrap">
       <div class="flex items-center gap-2">
         <!-- Votes Pill -->
         <div
@@ -99,7 +99,7 @@
               ? 'border-primary/30 bg-primary/5 text-primary'
               : (question.voteScore ?? 0) < 0
                 ? 'border-danger/30 bg-danger/5 text-danger'
-                : 'border-surface-border bg-surface/50 text-ink-muted'
+                : 'border-white/70 bg-white/35 text-ink-muted'
           "
         >
           <ChevronUp class="h-3.5 w-3.5" />
@@ -113,7 +113,7 @@
           :class="
             question.answerCount > 0
               ? 'border-primary/40 bg-primary/10 text-primary font-semibold hover:bg-primary/15'
-              : 'border-surface-border bg-surface/50 text-ink-muted hover:bg-surface'
+              : 'border-white/70 bg-white/35 text-ink-muted hover:bg-white/55'
           "
         >
           <MessageSquare class="h-3.5 w-3.5" />

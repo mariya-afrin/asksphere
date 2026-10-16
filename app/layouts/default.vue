@@ -9,9 +9,9 @@
     <slot />
   </div>
 
-  <div v-else class="min-h-screen flex flex-col bg-surface">
+  <div v-else class="relative min-h-screen flex flex-col">
     <AppHeader />
-    <main class="flex-1"><div class="container-page py-6"><slot /></div></main>
+    <main class="relative z-[1] flex-1"><div class="container-page py-6"><slot /></div></main>
     <AppFooter />
   </div>
 </template>
