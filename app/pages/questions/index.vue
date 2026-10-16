@@ -1,22 +1,30 @@
 <template>
   <div class="space-y-6">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-semibold text-ink">All questions</h1>
-      <div class="flex flex-wrap gap-2">
-        <button
-          v-for="tab in tabs"
-          :key="tab.value"
-          type="button"
-          class="rounded-lg px-3 py-1.5 text-sm font-medium border"
-          :class="
-            sort === tab.value
-              ? 'bg-primary text-white border-primary'
-              : 'bg-white text-ink-muted border-surface-border hover:bg-surface'
-          "
-          @click="setSort(tab.value)"
-        >
-          {{ tab.label }}
-        </button>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-surface-border">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-ink">All questions</h1>
+        <p class="text-xs sm:text-sm text-ink-muted mt-0.5">Explore community questions, discussions, and solutions</p>
+      </div>
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex items-center gap-1.5 p-1 bg-surface-card rounded-lg border border-surface-border">
+          <button
+            v-for="tab in tabs"
+            :key="tab.value"
+            type="button"
+            class="rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-all"
+            :class="
+              sort === tab.value
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-ink-muted hover:text-ink hover:bg-surface'
+            "
+            @click="setSort(tab.value)"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+        <NuxtLink to="/ask" class="btn-primary text-xs sm:text-sm shrink-0">
+          Ask question
+        </NuxtLink>
       </div>
     </div>
 

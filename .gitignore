@@ -34,6 +34,10 @@ Thumbs.db
 coverage
 .nyc_output
 
+# Uploads
+public/uploads/*
+!public/uploads/.gitkeep
+
 # Misc
 *.tsbuildinfo
 .eslintcache

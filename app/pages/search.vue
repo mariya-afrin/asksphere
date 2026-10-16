@@ -48,21 +48,50 @@ const q = computed(() => (route.query.q as string) || '')
 const page = computed(() => Number(route.query.page ?? 1) || 1)
 const localQuery = ref(q.value)
 
-watch(q, (v) => { localQuery.value = v })
+watch(q, (v) => {
+  if (v !== localQuery.value) {
+    localQuery.value = v
+  }
+})
 
 useHead(() => ({ title: q.value ? `Search: ${q.value}` : 'Search' }))
 
 const { data, pending } = await useFetch<{
   success: boolean
-  data: { items: QuestionCardData[]; totalPages: number }
+  data: { items: QuestionCardData[]; totalPages: number; total?: number }
 }>('/api/questions', {
-  query: computed(() => ({ search: q.value, page: page.value, limit: 10 }))
+  query: computed(() => ({
+    search: q.value || undefined,
+    page: page.value,
+    limit: 10
+  }))
 })
 
 const items = computed<QuestionCardData[]>(() => data.value?.data?.items ?? [])
 const totalPages = computed(() => data.value?.data?.totalPages ?? 1)
+const total = computed(() => data.value?.data?.total ?? items.value.length)
+
+// Debounced live search as the user types word by word
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(localQuery, (val) => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    const trimmed = val.trim()
+    if (trimmed !== q.value) {
+      router.replace({
+        query: {
+          ...route.query,
+          q: trimmed || undefined,
+          page: undefined
+        }
+      })
+    }
+  }, 250)
+})
 
 function onSearch() {
+  if (debounceTimer) clearTimeout(debounceTimer)
   const value = localQuery.value.trim()
   router.push({ query: value ? { q: value } : {} })
 }

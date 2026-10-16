@@ -4,12 +4,27 @@
 
     <template v-else-if="profile">
       <header class="card p-6 flex items-start gap-4">
-        <div class="h-16 w-16 rounded-full bg-primary text-white grid place-items-center text-xl font-semibold shrink-0">
-          {{ profile.user.username.charAt(0).toUpperCase() }}
+        <div class="h-16 w-16 rounded-full bg-primary text-white grid place-items-center text-xl font-semibold shrink-0 overflow-hidden">
+          <img
+            v-if="profile.user.avatarUrl"
+            :src="profile.user.avatarUrl"
+            :alt="profile.user.username"
+            class="h-full w-full object-cover"
+          />
+          <span v-else>{{ profile.user.username.charAt(0).toUpperCase() }}</span>
         </div>
-        <div class="flex-1">
-          <h1 class="text-lg font-semibold text-ink">{{ profile.user.username }}</h1>
-          <p v-if="profile.user.bio" class="text-sm text-ink-muted mt-1">{{ profile.user.bio }}</p>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <h1 class="text-lg font-semibold text-ink">{{ profile.user.username }}</h1>
+            <NuxtLink
+              v-if="isCurrentUser"
+              to="/settings/profile"
+              class="btn-secondary text-xs"
+            >
+              Edit profile
+            </NuxtLink>
+          </div>
+          <p v-if="profile.user.bio" class="text-sm text-ink-muted mt-1 whitespace-pre-wrap">{{ profile.user.bio }}</p>
           <div class="mt-3 flex flex-wrap gap-4 text-xs text-ink-muted">
             <span><b class="text-ink">{{ profile.user.reputation }}</b> reputation</span>
             <span><b class="text-ink">{{ profile.user.questionCount }}</b> questions</span>
@@ -55,6 +70,16 @@
         <EmptyState v-else title="No answers yet" />
       </section>
     </template>
+
+    <EmptyState
+      v-else
+      title="User not found"
+      description="The user you are looking for does not exist."
+    >
+      <template #action>
+        <NuxtLink to="/" class="btn-primary">Back to home</NuxtLink>
+      </template>
+    </EmptyState>
   </div>
 </template>
 
@@ -63,6 +88,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+const { user } = useAuth()
 const username = computed(() => route.params.username as string)
 
 interface Profile {
@@ -70,6 +96,7 @@ interface Profile {
     id: string
     username: string
     bio: string
+    avatarUrl?: string
     reputation: number
     questionCount: number
     answerCount: number
@@ -80,11 +107,14 @@ interface Profile {
   answers: { id: string; body: string; voteScore: number; questionId: string | null; questionTitle: string; createdAt: string }[]
 }
 
-const { data, pending } = await useFetch<{ success: boolean; data: Profile }>(
+const { data, pending, error } = await useFetch<{ success: boolean; data: Profile }>(
   () => `/api/users/${username.value}`
 )
 
 const profile = computed(() => data.value?.data ?? null)
+const isCurrentUser = computed(
+  () => user.value?.username && user.value.username === profile.value?.user.username
+)
 
 useHead(() => ({
   title: profile.value?.user.username ?? 'Profile'

@@ -2,7 +2,14 @@
 // Run with:  npm run seed
 
 import 'dotenv/config'
+import dns from 'node:dns'
 import mongoose from 'mongoose'
+
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1'])
+} catch {
+  // Ignore if restricted
+}
 import { User } from '../models/User'
 import { Question } from '../models/Question'
 

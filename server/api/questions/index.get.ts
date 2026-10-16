@@ -26,7 +26,21 @@ export default defineEventHandler(async (event) => {
     if (category) filter.category = category
     if (tag) filter.tags = tag.toLowerCase()
     if (sort === 'unanswered') filter.answerCount = 0
-    if (search) filter.$text = { $search: search }
+    if (search && search.trim()) {
+      const words = search
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      if (words.length > 0) {
+        filter.$and = words.map((w) => {
+          const reg = new RegExp(w, 'i')
+          return {
+            $or: [{ title: reg }, { body: reg }, { tags: reg }]
+          }
+        })
+      }
+    }
 
     let sortSpec: Record<string, 1 | -1> = { createdAt: -1 }
     if (sort === 'popular') {
@@ -40,9 +54,9 @@ export default defineEventHandler(async (event) => {
         .sort(sortSpec)
         .skip(skip)
         .limit(limit)
-        .populate<{ authorId: { username: string } | null }>({
+        .populate<{ authorId: { _id: unknown; username: string; avatarUrl?: string; reputation?: number } | null }>({
           path: 'authorId',
-          select: 'username'
+          select: 'username avatarUrl reputation'
         })
         .lean()
     ])
@@ -57,7 +71,11 @@ export default defineEventHandler(async (event) => {
       viewCount: q.viewCount,
       voteScore: q.voteScore,
       createdAt: (q as { createdAt: Date }).createdAt.toISOString(),
-      author: { username: q.authorId?.username ?? 'deleted-user' }
+      author: {
+        username: q.authorId?.username ?? 'deleted-user',
+        avatarUrl: q.authorId?.avatarUrl ?? '',
+        reputation: q.authorId?.reputation ?? 0
+      }
     }))
 
     return ok({

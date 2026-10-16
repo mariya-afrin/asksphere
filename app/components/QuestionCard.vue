@@ -3,57 +3,109 @@
  * Props are a subset of the Question model.
  -->
 <template>
-  <article class="card p-4 hover:border-primary/40 transition-colors">
-    <div class="flex gap-4">
-      <!-- Stats column -->
-      <div class="hidden sm:flex flex-col items-center gap-3 text-xs text-ink-muted min-w-[3rem]">
-        <div class="text-center">
-          <div class="text-base font-semibold text-ink">{{ question.answerCount }}</div>
-          <div>answers</div>
+  <article class="card p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-all duration-150">
+    <div class="flex items-start gap-4 sm:gap-5">
+      <!-- Stats column (Desktop / Tablet) -->
+      <div class="hidden sm:flex flex-col items-center gap-2 text-xs shrink-0 w-16">
+        <!-- Vote Score -->
+        <div class="flex flex-col items-center justify-center w-full py-1 text-center">
+          <span class="text-sm font-bold text-ink leading-tight">{{ question.voteScore ?? 0 }}</span>
+          <span class="text-[10px] text-ink-muted uppercase tracking-wider">votes</span>
         </div>
-        <div class="text-center">
-          <div class="text-base font-semibold text-ink">{{ question.viewCount }}</div>
-          <div>views</div>
+
+        <!-- Answers pill -->
+        <div
+          class="flex flex-col items-center justify-center w-full py-1.5 px-2 rounded-lg border text-center transition-colors"
+          :class="
+            question.answerCount > 0
+              ? 'border-primary/40 bg-primary/5 text-primary font-semibold'
+              : 'border-surface-border text-ink-muted'
+          "
+        >
+          <span class="text-sm font-bold leading-tight">{{ question.answerCount }}</span>
+          <span class="text-[10px] uppercase tracking-wider">
+            {{ question.answerCount === 1 ? 'answer' : 'answers' }}
+          </span>
+        </div>
+
+        <!-- Views -->
+        <div class="text-[11px] text-ink-muted text-center pt-0.5">
+          {{ question.viewCount }} views
         </div>
       </div>
 
       <!-- Main content -->
       <div class="flex-1 min-w-0">
-        <h2 class="text-base font-semibold text-ink leading-snug">
+        <!-- Mobile-only inline stats -->
+        <div class="flex sm:hidden items-center gap-2 text-xs text-ink-muted mb-1.5 flex-wrap">
+          <span class="font-medium text-ink">{{ question.voteScore ?? 0 }} votes</span>
+          <span>·</span>
+          <span
+            :class="question.answerCount > 0 ? 'text-primary font-semibold' : ''"
+          >
+            {{ question.answerCount }} {{ question.answerCount === 1 ? 'answer' : 'answers' }}
+          </span>
+          <span>·</span>
+          <span>{{ question.viewCount }} views</span>
+        </div>
+
+        <!-- Title -->
+        <h2 class="text-base sm:text-lg font-semibold text-ink leading-snug">
           <NuxtLink
             :to="`/questions/${question.id}`"
-            class="hover:text-primary"
+            class="hover:text-primary transition-colors"
           >
             {{ question.title }}
           </NuxtLink>
         </h2>
 
-        <p class="mt-1 text-sm text-ink-muted line-clamp-2">
+        <!-- Excerpt -->
+        <p class="mt-1.5 text-sm text-ink-muted line-clamp-2 leading-relaxed">
           {{ question.excerpt }}
         </p>
 
-        <div class="mt-3 flex flex-wrap items-center gap-2">
-          <span class="tag">{{ question.category }}</span>
-          <span
+        <!-- Category & Tags -->
+        <div class="mt-3 flex flex-wrap items-center gap-1.5">
+          <span class="tag bg-primary/5 text-primary border-primary/20 font-medium">
+            {{ question.category }}
+          </span>
+          <NuxtLink
             v-for="tag in question.tags"
             :key="tag"
-            class="tag"
+            :to="`/tags/${tag}`"
+            class="tag hover:border-primary/40 transition-colors"
           >
             #{{ tag }}
-          </span>
+          </NuxtLink>
         </div>
 
-        <div class="mt-3 flex items-center justify-between text-xs text-ink-muted">
-          <span>
-            by
-            <NuxtLink
-              :to="`/users/${question.author.username}`"
-              class="link"
-            >
-              {{ question.author.username }}
-            </NuxtLink>
-          </span>
-          <time :datetime="question.createdAt">
+        <!-- Footer: Author & Timestamp -->
+        <div class="mt-3.5 pt-3 border-t border-surface-border flex items-center justify-between text-xs text-ink-muted gap-2 flex-wrap">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="h-5 w-5 rounded-full bg-primary text-white grid place-items-center text-[10px] font-semibold shrink-0 overflow-hidden">
+              <img
+                v-if="question.author.avatarUrl"
+                :src="question.author.avatarUrl"
+                :alt="question.author.username"
+                class="h-full w-full object-cover"
+              />
+              <span v-else>{{ question.author.username.charAt(0).toUpperCase() }}</span>
+            </div>
+            <span class="truncate">
+              by
+              <NuxtLink
+                :to="`/users/${question.author.username}`"
+                class="link font-medium text-ink hover:text-primary"
+              >
+                {{ question.author.username }}
+              </NuxtLink>
+              <span v-if="question.author.reputation" class="text-ink-muted ml-1">
+                ({{ question.author.reputation }})
+              </span>
+            </span>
+          </div>
+
+          <time :datetime="question.createdAt" class="text-ink-muted shrink-0 text-[11px]">
             {{ relativeTime }}
           </time>
         </div>
@@ -73,8 +125,13 @@ export interface QuestionCardData {
   tags: string[]
   answerCount: number
   viewCount: number
+  voteScore?: number
   createdAt: string
-  author: { username: string }
+  author: {
+    username: string
+    avatarUrl?: string
+    reputation?: number
+  }
 }
 
 const props = defineProps<{ question: QuestionCardData }>()

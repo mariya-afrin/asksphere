@@ -41,7 +41,7 @@
 
     <!-- Question list -->
     <section class="space-y-3">
-      <template v-if="!loading && visibleQuestions.length">
+      <template v-if="!pending && visibleQuestions.length">
         <QuestionCard
           v-for="q in visibleQuestions"
           :key="q.id"
@@ -49,7 +49,7 @@
         />
       </template>
 
-      <LoadingState v-else-if="loading" label="Loading questions..." />
+      <LoadingState v-else-if="pending" label="Loading questions..." />
 
       <EmptyState
         v-else
@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import type { QuestionCardData } from '~/components/QuestionCard.vue'
 
 useHead({ title: 'Home' })
@@ -79,96 +79,19 @@ const tabs: { value: TabValue; label: string }[] = [
 ]
 
 const activeTab = ref<TabValue>('latest')
-const loading = ref(true)
 
-// TEMPORARY SAMPLE DATA — will be replaced in Phase 4.
-const sampleQuestions: (QuestionCardData & { _popular: number })[] = [
-  {
-    id: 'sample-1',
-    title: 'How do I start learning web development in 2026?',
-    excerpt:
-      'I want to become a web developer but there are so many tutorials. Where should a complete beginner actually start?',
-    category: 'Programming',
-    tags: ['javascript', 'beginners', 'career'],
-    answerCount: 4,
-    viewCount: 312,
-    createdAt: new Date(Date.now() - 1000 * 60 * 42).toISOString(),
-    author: { username: 'aya_k' },
-    _popular: 90
-  },
-  {
-    id: 'sample-2',
-    title: 'Why does my MongoDB query return an empty array?',
-    excerpt:
-      'I am using Mongoose and my find() call always returns []. The data exists in Atlas. What am I missing?',
-    category: 'Programming',
-    tags: ['mongodb', 'mongoose'],
-    answerCount: 2,
-    viewCount: 128,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-    author: { username: 'dev_tariq' },
-    _popular: 60
-  },
-  {
-    id: 'sample-3',
-    title: 'Best way to memorise biology terms before an exam?',
-    excerpt:
-      'I have a biology exam in two weeks and hundreds of terms to learn. Any study techniques that actually work?',
-    category: 'Education',
-    tags: ['study-tips', 'biology'],
-    answerCount: 0,
-    viewCount: 74,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
-    author: { username: 'noor_study' },
-    _popular: 20
-  },
-  {
-    id: 'sample-4',
-    title: 'Is a career switch into data science realistic at 35?',
-    excerpt:
-      'I have ten years of experience in finance. Realistically, what is the path to a data science role?',
-    category: 'Career',
-    tags: ['career-change', 'data-science'],
-    answerCount: 6,
-    viewCount: 512,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    author: { username: 'rana_f' },
-    _popular: 130
-  },
-  {
-    id: 'sample-5',
-    title: 'How much water should I actually drink per day?',
-    excerpt:
-      'I keep hearing different numbers. Is there a real scientific answer, or is 8 glasses a myth?',
-    category: 'Health and Wellness',
-    tags: ['nutrition', 'hydration'],
-    answerCount: 3,
-    viewCount: 190,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-    author: { username: 'dr_leo' },
-    _popular: 55
-  }
-]
-
-// Simulate a network request so the loading state is visible.
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 400)
+const { data, pending } = await useFetch<{
+  success: boolean
+  data: { items: QuestionCardData[]; totalPages: number }
+}>('/api/questions', {
+  query: computed(() => ({
+    sort: activeTab.value,
+    page: 1,
+    limit: 20
+  }))
 })
 
-const visibleQuestions = computed<QuestionCardData[]>(() => {
-  const list = [...sampleQuestions]
-  if (activeTab.value === 'popular') {
-    list.sort((a, b) => b._popular - a._popular)
-  } else if (activeTab.value === 'unanswered') {
-    return list.filter((q) => q.answerCount === 0)
-  } else {
-    list.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-  }
-  return list.map(({ _popular, ...rest }) => rest)
-})
+const visibleQuestions = computed<QuestionCardData[]>(
+  () => data.value?.data?.items ?? []
+)
 </script>

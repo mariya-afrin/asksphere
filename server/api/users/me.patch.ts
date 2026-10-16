@@ -10,7 +10,7 @@ import { ok, handleApiError, fail } from '../../utils/errors'
 
 const updateSchema = z.object({
   bio: z.string().trim().max(500).optional(),
-  avatarUrl: z.string().trim().url().max(500).or(z.literal('')).optional()
+  avatarUrl: z.string().trim().max(500).or(z.literal('')).optional()
 })
 
 export default defineEventHandler(async (event) => {

@@ -1,143 +1,191 @@
 <template>
-  <div class="max-w-3xl mx-auto space-y-6">
+  <div class="w-full space-y-6">
     <LoadingState v-if="pending" label="Loading question..." />
 
-    <div v-else-if="error" class="card p-6">
+    <div v-else-if="error" class="card p-6 max-w-2xl mx-auto">
       <p class="text-danger text-sm">{{ error.message }}</p>
     </div>
 
     <template v-else-if="question">
-      <!-- Question -->
-      <article class="card p-6">
-        <div class="flex items-start justify-between gap-4">
-          <h1 class="text-xl sm:text-2xl font-semibold text-ink leading-snug">
-            {{ question.title }}
-          </h1>
-          <div class="flex gap-2 shrink-0 flex-wrap justify-end">
-            <BookmarkButton
-              v-if="isAuthenticated"
-              :bookmarked="bookmarked"
-              :loading="bookmarkLoading"
-              @toggle="toggleBookmark"
-            />
-            <ReportButton
-              v-if="isAuthenticated && !isQuestionAuthor"
-              target-type="question"
-              :target-id="question.id"
-            />
-            <template v-if="isQuestionAuthor">
-              <NuxtLink
-                :to="`/questions/${question.id}/edit`"
-                class="btn-secondary text-xs"
-              >
-                Edit
-              </NuxtLink>
-              <button
-                type="button"
-                class="btn-danger text-xs"
-                @click="confirmOpen = true"
-              >
-                Delete
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-ink-muted">
-          <span class="tag">{{ question.category }}</span>
-          <span v-for="tag in question.tags" :key="tag" class="tag">#{{ tag }}</span>
-        </div>
-
-        <div class="mt-4 flex items-center justify-between text-xs text-ink-muted">
-          <span>
-            Asked by
-            <NuxtLink
-              :to="`/users/${question.author.username}`"
-              class="link"
-            >
-              {{ question.author.username }}
-            </NuxtLink>
-            · reputation {{ question.author.reputation }}
-          </span>
-          <time :datetime="question.createdAt">
-            {{ new Date(question.createdAt).toLocaleString() }}
-          </time>
-        </div>
-
-        <div class="mt-4 text-ink whitespace-pre-wrap text-sm leading-relaxed">
-          {{ question.body }}
-        </div>
-
-        <div class="mt-6 flex items-center gap-4 text-xs text-ink-muted">
-          <span>{{ question.viewCount }} views</span>
-          <span>{{ question.answerCount }} answers</span>
-          <span>Score: {{ question.voteScore }}</span>
-        </div>
-
-        <!-- Question comments -->
-        <div class="mt-4 border-t border-surface-border pt-3 space-y-2">
-          <CommentList
-            :comments="questionComments"
-            :current-user-id="user?.id ?? null"
-            :is-admin="user?.role === 'admin'"
-            @update="updateQuestionComment"
-            @delete="deleteQuestionComment"
-          />
-          <CommentForm
-            v-if="isAuthenticated"
-            :can-comment="true"
-            @submit="createQuestionComment"
-          />
-        </div>
-      </article>
-
-      <!-- Answer form -->
-      <section v-if="isAuthenticated" class="space-y-3">
-        <AnswerForm v-if="!editingAnswerId" @submit="submitAnswer" />
-        <AnswerForm
-          v-else
-          editing
-          :initial-body="editingAnswerBody"
-          @submit="saveEditedAnswer"
-          @cancel="cancelEdit"
-        />
-      </section>
-
-      <div v-else class="card p-5 text-sm text-ink-muted">
-        <NuxtLink to="/login" class="link">Log in</NuxtLink> to answer this question.
+      <!-- Breadcrumb navigation -->
+      <div class="flex items-center justify-between text-xs text-ink-muted">
+        <NuxtLink to="/questions" class="inline-flex items-center gap-1 hover:text-ink font-medium transition-colors">
+          ← Back to questions
+        </NuxtLink>
+        <span class="tag">{{ question.category }}</span>
       </div>
 
-      <!-- Answers list -->
-      <section class="space-y-3">
-        <h2 class="text-base font-semibold text-ink">
-          {{ answers.length }} {{ answers.length === 1 ? 'Answer' : 'Answers' }}
-        </h2>
+      <!-- Responsive Grid: Side-by-Side on Desktop (lg+), Stacked on Mobile -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        
+        <!-- LEFT COLUMN: Question Details & Discussion (lg:col-span-6 xl:col-span-7) -->
+        <div class="lg:col-span-6 xl:col-span-7 space-y-6">
+          <article class="card p-6 sm:p-7 space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <h1 class="text-xl sm:text-2xl font-bold text-ink leading-snug">
+                {{ question.title }}
+              </h1>
+              <div class="flex items-center gap-2 shrink-0 flex-wrap sm:justify-end">
+                <BookmarkButton
+                  v-if="isAuthenticated"
+                  :bookmarked="bookmarked"
+                  :loading="bookmarkLoading"
+                  @toggle="toggleBookmark"
+                />
+                <ReportButton
+                  v-if="isAuthenticated && !isQuestionAuthor"
+                  target-type="question"
+                  :target-id="question.id"
+                />
+                <template v-if="isQuestionAuthor">
+                  <NuxtLink
+                    :to="`/questions/${question.id}/edit`"
+                    class="btn-secondary text-xs"
+                  >
+                    Edit
+                  </NuxtLink>
+                  <button
+                    type="button"
+                    class="btn-danger text-xs"
+                    @click="confirmOpen = true"
+                  >
+                    Delete
+                  </button>
+                </template>
+              </div>
+            </div>
 
-        <LoadingState v-if="answersPending" label="Loading answers..." />
+            <!-- Tags -->
+            <div v-if="question.tags?.length" class="flex flex-wrap items-center gap-2">
+              <span v-for="tag in question.tags" :key="tag" class="tag">#{{ tag }}</span>
+            </div>
 
-        <AnswerCard
-          v-for="a in answers"
-          v-else
-          :key="a.id"
-          :answer="a"
-          :current-user-id="user?.id ?? null"
-          :question-author-id="question.author.id"
-          :is-admin="user?.role === 'admin'"
-          @accept="onAccept"
-          @edit="startEdit"
-          @delete="onDeleteAnswer"
-          @vote="onVote"
-          @comment-create="createAnswerComment"
-          @comment-update="updateAnswerComment"
-          @comment-delete="deleteAnswerComment"
-        />
+            <!-- Author & Metadata -->
+            <div class="flex items-center gap-3 text-xs text-ink-muted pb-4 border-b border-surface-border">
+              <div class="h-9 w-9 rounded-full bg-primary text-white grid place-items-center text-xs font-semibold shrink-0 overflow-hidden">
+                <img
+                  v-if="question.author.avatarUrl"
+                  :src="question.author.avatarUrl"
+                  :alt="question.author.username"
+                  class="h-full w-full object-cover"
+                />
+                <span v-else>{{ question.author.username.charAt(0).toUpperCase() }}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div>
+                  Asked by
+                  <NuxtLink
+                    :to="`/users/${question.author.username}`"
+                    class="link font-medium text-ink"
+                  >
+                    {{ question.author.username }}
+                  </NuxtLink>
+                  · reputation {{ question.author.reputation }}
+                </div>
+                <time :datetime="question.createdAt" class="text-[11px] text-ink-muted">
+                  {{ new Date(question.createdAt).toLocaleString() }}
+                </time>
+              </div>
+            </div>
 
-        <EmptyState
-          v-if="!answersPending && answers.length === 0"
-          title="No answers yet"
-          description="Be the first to help by answering this question."
-        />
-      </section>
+            <!-- Question Body -->
+            <div class="text-ink whitespace-pre-wrap text-sm sm:text-base leading-relaxed">
+              {{ question.body }}
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex items-center gap-4 pt-3 border-t border-surface-border text-xs text-ink-muted font-medium">
+              <span>{{ question.viewCount }} views</span>
+              <span>{{ question.answerCount }} answers</span>
+              <span>Score: {{ question.voteScore }}</span>
+              <span v-if="question.status !== 'open'" class="capitalize font-semibold text-danger">({{ question.status }})</span>
+            </div>
+
+            <!-- Question comments -->
+            <div class="border-t border-surface-border pt-4 space-y-3">
+              <div class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Comments</div>
+              <CommentList
+                :comments="questionComments"
+                :current-user-id="user?.id ?? null"
+                :is-admin="user?.role === 'admin'"
+                @update="updateQuestionComment"
+                @delete="deleteQuestionComment"
+              />
+              <CommentForm
+                v-if="isAuthenticated"
+                :can-comment="true"
+                @submit="createQuestionComment"
+              />
+            </div>
+          </article>
+        </div>
+
+        <!-- RIGHT COLUMN: Answers List & Composer (lg:col-span-6 xl:col-span-5) -->
+        <div class="lg:col-span-6 xl:col-span-5 space-y-6">
+          
+          <!-- Answer composer card -->
+          <section v-if="isAuthenticated" class="space-y-3">
+            <AnswerForm v-if="!editingAnswerId" @submit="submitAnswer" />
+            <AnswerForm
+              v-else
+              editing
+              :initial-body="editingAnswerBody"
+              @submit="saveEditedAnswer"
+              @cancel="cancelEdit"
+            />
+          </section>
+
+          <div v-else class="card p-5 text-sm text-ink-muted text-center space-y-2">
+            <p>Have an answer to this question?</p>
+            <div class="flex justify-center gap-2">
+              <NuxtLink to="/login" class="btn-primary text-xs">Log in to answer</NuxtLink>
+              <NuxtLink to="/register" class="btn-secondary text-xs">Sign up</NuxtLink>
+            </div>
+          </div>
+
+          <!-- Answers Section Header & Feed -->
+          <section class="space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-border">
+              <h2 class="text-base font-semibold text-ink flex items-center gap-2">
+                <span>{{ answers.length }} {{ answers.length === 1 ? 'Answer' : 'Answers' }}</span>
+                <span
+                  v-if="question.acceptedAnswerId"
+                  class="tag text-success border-success/40 bg-success/5 text-[11px]"
+                >
+                  ✓ Solved
+                </span>
+              </h2>
+            </div>
+
+            <LoadingState v-if="answersPending" label="Loading answers..." />
+
+            <template v-else-if="answers.length">
+              <AnswerCard
+                v-for="a in answers"
+                :key="a.id"
+                :answer="a"
+                :current-user-id="user?.id ?? null"
+                :question-author-id="question.author.id"
+                :is-admin="user?.role === 'admin'"
+                @accept="onAccept"
+                @edit="startEdit"
+                @delete="onDeleteAnswer"
+                @vote="onVote"
+                @comment-create="createAnswerComment"
+                @comment-update="updateAnswerComment"
+                @comment-delete="deleteAnswerComment"
+              />
+            </template>
+
+            <EmptyState
+              v-else-if="!answersPending && answers.length === 0"
+              title="No answers yet"
+              description="Be the first to help by answering this question above."
+            />
+          </section>
+        </div>
+
+      </div>
     </template>
 
     <ConfirmDialog

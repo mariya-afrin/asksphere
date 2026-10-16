@@ -39,14 +39,17 @@ export type QuestionCreateInput = z.infer<typeof questionCreateSchema>
 export const questionUpdateSchema = questionCreateSchema.partial()
 export type QuestionUpdateInput = z.infer<typeof questionUpdateSchema>
 
+const emptyToUndefined = (val: unknown) =>
+  typeof val === 'string' && val.trim() === '' ? undefined : val
+
 export const questionListQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10),
-  search: z.string().trim().max(200).optional(),
-  category: z.enum(CATEGORIES).optional(),
-  tag: z.string().trim().max(30).optional(),
-  sort: z.enum(['latest', 'popular', 'unanswered']).default('latest'),
-  status: z.enum(['open', 'closed', 'removed']).default('open')
+  page: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).default(1)),
+  limit: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(50).default(10)),
+  search: z.preprocess(emptyToUndefined, z.string().trim().max(200).optional()),
+  category: z.preprocess(emptyToUndefined, z.enum(CATEGORIES).optional()),
+  tag: z.preprocess(emptyToUndefined, z.string().trim().max(30).optional()),
+  sort: z.preprocess(emptyToUndefined, z.enum(['latest', 'popular', 'unanswered']).default('latest')),
+  status: z.preprocess(emptyToUndefined, z.enum(['open', 'closed', 'removed']).default('open'))
 })
 
 export type QuestionListQuery = z.infer<typeof questionListQuerySchema>
