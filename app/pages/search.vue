@@ -17,10 +17,10 @@
 
     <LoadingState v-if="pending" label="Searching..." />
 
-    <template v-else-if="items.length">
+    <div v-else-if="items.length" class="space-y-3.5">
       <QuestionCard v-for="item in items" :key="item.id" :question="item" />
       <Pagination :page="page" :total-pages="totalPages" @change="setPage" />
-    </template>
+    </div>
 
     <EmptyState
       v-else-if="q"

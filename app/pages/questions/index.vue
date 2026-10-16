@@ -1,17 +1,17 @@
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-surface-border">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-surface-border">
       <div>
         <h1 class="text-xl sm:text-2xl font-bold text-ink">All questions</h1>
         <p class="text-xs sm:text-sm text-ink-muted mt-0.5">Explore community questions, discussions, and solutions</p>
       </div>
-      <div class="flex items-center gap-3 flex-wrap">
-        <div class="flex items-center gap-1.5 p-1 bg-surface-card rounded-lg border border-surface-border">
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <div class="flex items-center gap-1 p-1 bg-surface-card rounded-xl border border-surface-border shadow-xs">
           <button
             v-for="tab in tabs"
             :key="tab.value"
             type="button"
-            class="rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-all"
+            class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium transition-all"
             :class="
               sort === tab.value
                 ? 'bg-primary text-white shadow-sm'
@@ -19,7 +19,8 @@
             "
             @click="setSort(tab.value)"
           >
-            {{ tab.label }}
+            <component :is="tab.icon" class="h-3.5 w-3.5" />
+            <span>{{ tab.label }}</span>
           </button>
         </div>
         <NuxtLink to="/ask" class="btn-primary text-xs sm:text-sm shrink-0">
@@ -30,14 +31,14 @@
 
     <LoadingState v-if="pending" label="Loading questions..." />
 
-    <template v-else-if="items.length">
+    <div v-else-if="items.length" class="space-y-3.5">
       <QuestionCard v-for="q in items" :key="q.id" :question="q" />
       <Pagination
         :page="page"
         :total-pages="totalPages"
         @change="setPage"
       />
-    </template>
+    </div>
 
     <EmptyState
       v-else
@@ -52,7 +53,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { Clock, Flame, HelpCircle } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { QuestionCardData } from '~/components/QuestionCard.vue'
 
@@ -63,10 +65,10 @@ type SortValue = 'latest' | 'popular' | 'unanswered'
 const route = useRoute()
 const router = useRouter()
 
-const tabs: { value: SortValue; label: string }[] = [
-  { value: 'latest', label: 'Latest' },
-  { value: 'popular', label: 'Popular' },
-  { value: 'unanswered', label: 'Unanswered' }
+const tabs = [
+  { value: 'latest' as SortValue, label: 'Latest', icon: Clock },
+  { value: 'popular' as SortValue, label: 'Popular', icon: Flame },
+  { value: 'unanswered' as SortValue, label: 'Unanswered', icon: HelpCircle }
 ]
 
 const sort = computed<SortValue>(() => (route.query.sort as SortValue) || 'latest')

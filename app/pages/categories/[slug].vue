@@ -6,10 +6,10 @@
 
     <LoadingState v-if="pending" label="Loading questions..." />
 
-    <template v-else-if="items.length">
+    <div v-else-if="items.length" class="space-y-3.5">
       <QuestionCard v-for="q in items" :key="q.id" :question="q" />
       <Pagination :page="page" :total-pages="totalPages" @change="setPage" />
-    </template>
+    </div>
 
     <EmptyState
       v-else

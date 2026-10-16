@@ -1,16 +1,14 @@
 <!-- app/pages/index.vue
  * Homepage. Shows hero, filters, and a list of questions.
- * Uses TEMPORARY SAMPLE DATA for now. In Phase 4 this is replaced
- * with real data from GET /api/questions.
  -->
 <template>
   <div class="space-y-8">
     <!-- Hero -->
-    <section class="card p-6 sm:p-8">
+    <section class="card p-6 sm:p-8 bg-white border border-surface-border">
       <h1 class="text-2xl sm:text-3xl font-bold text-ink">
         Ask. Share. Learn Together.
       </h1>
-      <p class="mt-2 text-ink-muted max-w-2xl">
+      <p class="mt-2 text-ink-muted max-w-2xl leading-relaxed text-sm sm:text-base">
         AskSphere is a community where anyone can ask questions on any topic
         and get real answers from people who know. Technology, science,
         education, careers, health, and more.
@@ -27,20 +25,21 @@
         v-for="tab in tabs"
         :key="tab.value"
         type="button"
-        class="rounded-lg px-3 py-1.5 text-sm font-medium border"
+        class="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-medium border transition-colors"
         :class="
           activeTab === tab.value
-            ? 'bg-primary text-white border-primary'
-            : 'bg-white text-ink-muted border-surface-border hover:bg-surface'
+            ? 'bg-primary text-white border-primary shadow-sm'
+            : 'bg-white text-ink-muted border-surface-border hover:bg-surface hover:text-ink'
         "
         @click="activeTab = tab.value"
       >
-        {{ tab.label }}
+        <component :is="tab.icon" class="h-3.5 w-3.5" />
+        <span>{{ tab.label }}</span>
       </button>
     </section>
 
-    <!-- Question list -->
-    <section class="space-y-3">
+    <!-- Question feed -->
+    <section class="space-y-3.5">
       <template v-if="!pending && visibleQuestions.length">
         <QuestionCard
           v-for="q in visibleQuestions"
@@ -65,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+import { Clock, Flame, HelpCircle } from 'lucide-vue-next'
 import { ref, computed } from 'vue'
 import type { QuestionCardData } from '~/components/QuestionCard.vue'
 
@@ -72,10 +72,10 @@ useHead({ title: 'Home' })
 
 type TabValue = 'latest' | 'popular' | 'unanswered'
 
-const tabs: { value: TabValue; label: string }[] = [
-  { value: 'latest', label: 'Latest' },
-  { value: 'popular', label: 'Popular' },
-  { value: 'unanswered', label: 'Unanswered' }
+const tabs = [
+  { value: 'latest' as TabValue, label: 'Latest', icon: Clock },
+  { value: 'popular' as TabValue, label: 'Popular', icon: Flame },
+  { value: 'unanswered' as TabValue, label: 'Unanswered', icon: HelpCircle }
 ]
 
 const activeTab = ref<TabValue>('latest')
